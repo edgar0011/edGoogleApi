@@ -65,7 +65,7 @@ module.exports = function(grunt) {
             dist: {
                 src: [
 
-                    '<%= config.dist %>/<%= config.temp %>/ed.ui.js',
+                    '<%= config.dist %>/<%= config.temp %>/ed.googleApi.js',
                     '<%= config.dist %>/<%= config.temp %>/*/*.js',
                     '<%= config.dist %>/<%= config.temp %>/app.templates.js'
                     //'<%= config.dist %>/<%= config.temp %>/app.templates.js'

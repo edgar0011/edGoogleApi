@@ -3,7 +3,7 @@
  */
 angular.module( "ed.googleApi", ['uiGmapgoogle-maps'] )
 
-.value("GOOGLE_API_CONFIG", {
+.constant("GOOGLE_API_CONFIG", {
     libraries: 'weather,geometry,visualization',
     key: 'AIzaSyD8_Y1ccdeTAVu-MyFgEc2767rm8o1u12Y'
 })
