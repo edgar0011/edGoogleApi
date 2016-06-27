@@ -81,7 +81,24 @@ function GoogleMapAPI($http, $q, $log, uiGmapGoogleMapApi) {
 
   }
 
-  function lookUpMethod(search, resultCallback, faultCallBack) {
+  function googleAddressItemsUnique(address_components){
+    var addressItems = address_components.map(function(ac){
+      return ac.long_name;
+    });
+
+    var usedItems = {};
+    var newItems = [];
+    addressItems.forEach(function(item, index){
+      if (!usedItems[item]){
+        usedItems[item] = true;
+        newItems.push(item);
+      }
+    });
+
+    return newItems.join(", ");
+  }
+
+  function lookUpMethod(search, resultCallback, faultCallBack, restrictCountries) {
 
 
     //zip code formatting
@@ -99,11 +116,16 @@ function GoogleMapAPI($http, $q, $log, uiGmapGoogleMapApi) {
       return $q.reject();
     }
 
-    //TODO compare  .success(successFunc).error(errorFunc) to .then(successFunc, errorFunc);
-    var promiseCZ = $http.get("http://maps.googleapis.com/maps/api/geocode/json?address=" + search + ",CZ");
-    var promiseSK = $http.get("http://maps.googleapis.com/maps/api/geocode/json?address=" + search + ",SK");
     //var promise = googleMapAPI.lookUpGeocode(search, true);
-    var re = $q.all([promiseCZ, promiseSK])
+    var promises = [];
+    if (restrictCountries) {
+      restrictCountries.forEach(function(countryCode){
+        promises.push($http.get("http://maps.googleapis.com/maps/api/geocode/json?address=" + search + "," + countryCode));
+      });
+    } else {
+      promises = [$http.get("http://maps.googleapis.com/maps/api/geocode/json?address=" + search)];
+    }
+    var re = $q.all(promises)
       .then(function(response){
 
         var results = response[0].data.results.concat(response[1].data.results);
@@ -131,7 +153,7 @@ function GoogleMapAPI($http, $q, $log, uiGmapGoogleMapApi) {
           if (czsk) {
             ar.push({
               id: idcs++,
-              name: item.formatted_address,
+              name: googleAddressItemsUnique(item),
               location: item.geometry.location,
               data: item
             });
@@ -154,7 +176,8 @@ function GoogleMapAPI($http, $q, $log, uiGmapGoogleMapApi) {
 
     lookUpGeocode:lookUpGeocode,
     getBuildingSiteDistances:getBuildingSiteDistances,
-    lookUpMethod:lookUpMethod
+    lookUpMethod:lookUpMethod,
+    googleAddressItemsUnique:googleAddressItemsUnique
 
   };
 
